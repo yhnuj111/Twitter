@@ -28,7 +28,7 @@ export default {
       if (this.dummy !== this.name) {
        this.dummy = this.name;
       await this.axios
-        .post("http://localhost:4000/search", {
+        .post("http://13.58.192.11:4000/search", {
           screen_name: this.name
         })
         .then(res => {
