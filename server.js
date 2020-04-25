@@ -13,9 +13,6 @@ var webpackServer = new WebpackDevServer(webpack(webpackConfig), {
   stats: { colors: true }
 });
 
-webpackServer.listen(9090, 'localhost', function ( err ) {
-  if ( err ) { console.log(err); }
-});
 
 // const functions = require('firebase-functions');
 const app = express();
@@ -66,6 +63,11 @@ app.post('/search', async (req, res) => {
             res.send({status: 500});
         }
 });
+
+webpackServer.listen(9000, 'localhost', function ( err ) {
+  if ( err ) { console.log(err); }
+});
+
 
 var server = app.listen(4000, function () {
   var host = 'localhost';

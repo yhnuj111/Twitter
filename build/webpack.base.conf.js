@@ -16,9 +16,9 @@ module.exports = {
     app: './src/main.js'
   },
   output: {
-    path: config.build.assetsRoot,
+    path: path.join(__dirname, '/dist/'),
     filename: '[name].js',
-    publicPath: 'http://localhost:9090/dist/',
+    publicPath: 'dist/',
     chunkFilename: '[id].js'
   },
   resolve: {

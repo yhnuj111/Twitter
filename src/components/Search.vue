@@ -3,12 +3,12 @@
     <input
       class="form-control mr-sm-2"
       type="text"
-      placeholder="Search"
+      placeholder="Enter Twitter Id"
       aria-label="Search"
       v-model="name"
       lazy
     />
-    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" @click="sumbit">Search</button>
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" @click.prevent="sumbit">Search</button>
   </form>
 </template>
 
@@ -18,19 +18,24 @@ export default {
   data() {
     return {
       name: "",
+      dummy:"",
       finded: false
     };
   },
 
   methods: {
     async sumbit(e) {
-      e.preventDefault();
+      if (this.dummy !== this.name) {
+       this.dummy = this.name;
       await this.axios
         .post("http://localhost:4000/search", {
           screen_name: this.name
         })
         .then(res => {
-          if (res.status === 200 && res.data.status === 200) {
+          if (res.length === 0) {
+              this.finded = false;
+              eventBus.$emit("updateWarn", this.finded);
+          } else if (res.status === 200 && res.data.status === 200) {
             let un = res.data.msg;
             // console.log(un);
             if (un.length !== 0) {
@@ -59,6 +64,7 @@ export default {
         .catch(err => {
           console.log(err);
         });
+      }
     }
   }
 };

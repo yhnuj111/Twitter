@@ -1,11 +1,13 @@
 <template>
   <nav
     class="navbar navbar-light bg-light"
+    ref="header"
     :style="{
     backgroundImage: 'url(' + bannerSrc + ')', 
     height: bannerHeight + 'px', 
-    backgroundAttachment: 'fixed',
-    backgroundPosition: 'center top'
+    backgroundPosition: 'center top',
+    backgroundSize: 'cover',
+    backgroundAttachment: 'scroll'
     }"
   >
     <a class="navbar-brand" href="#">
@@ -44,9 +46,14 @@ export default {
         img.onerror = reject;
         img.src = this.bannerSrc;
       });
+    },
+    handleScroll() {
+      let scrolledY = window.scrollY;
+      this.$refs.header.style.backgroundPosition = 'left ' + ((scrolledY)) + 'px';
     }
   },
   async created() {
+    window.addEventListener('scroll', this.handleScroll);
     eventBus.$on("getName", data => {
       this.username = data;
     });
@@ -73,6 +80,9 @@ export default {
         this.showPics = true;
       }
     });
+  },
+  destroyed() {
+    window.removeEventListener('scroll', this.handleScroll);
   }
 };
 </script>

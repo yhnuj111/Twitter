@@ -14,7 +14,7 @@
       <div class="card-body">
         <h5 class="card-title">{{c.cardTitle}}</h5>
         <p class="card-text">{{ c.description }}</p>
-        <button v-clipboard:copy="c.description" class="btn btn-primary">Go somewhere</button>
+        <button v-clipboard:copy="c.description" class="btn btn-primary">Click to Copy Text</button>
       </div>
     </div>
   </div>
@@ -45,6 +45,7 @@ export default {
       let allTweets = this.tweets;
       this.cards = [];
       // console.log(allTweets);
+      
       try {
         for (let i = 0; i < allTweets.length; ++i) {
           let cardSrc = "";
@@ -153,6 +154,13 @@ export default {
       this.tweets = data;
       // console.log(this.tweets);
       await this.arrangeData();
+    });
+  },
+  created() {
+    eventBus.$on("updateWarn",  data => {     
+      if (data) {    
+        this.cards = [];
+      }
     });
   }
 };
