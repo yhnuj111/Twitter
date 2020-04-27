@@ -3,9 +3,15 @@ import App from './App.vue'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import VueClipboard from 'vue-clipboard2';
+import VModal from 'vue-js-modal';
+
+
+ 
+Vue.use(VModal, { dynamic: true, dynamicDefaults: { clickToClose: true } })
 
 Vue.use(VueAxios, axios);
 Vue.use(VueClipboard);
+
 
 export const eventBus = new Vue();
 

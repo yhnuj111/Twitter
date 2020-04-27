@@ -1,9 +1,12 @@
 <template>
   <div id="app">
-    <app-header> </app-header>
+    <transition name="slide" mode="out-in">
+    <app-header v-if="!isWarning"> </app-header>
+    </transition>
     <app-warn v-if="isWarning"> </app-warn>
     <app-search :finder="isWarning"> </app-search>
     <app-cards> </app-cards>
+    
   </div>
 </template>
 
@@ -30,7 +33,9 @@ export default {
     eventBus.$on("updateWarn",  data => {
       this.isWarning = data;
     });
-  }
+    
+  },
+
 }
 </script>
 
@@ -71,4 +76,38 @@ header span {
   box-sizing: border-box;
   padding-top: 16px;
 }
+
+
+.slide-enter-active {
+   -moz-transition-duration: 1s;
+   -webkit-transition-duration: 1s;
+   -o-transition-duration: 1s;
+   transition-duration: 1s;
+   -moz-transition-timing-function: ease-in;
+   -webkit-transition-timing-function: ease-in;
+   -o-transition-timing-function: ease-in;
+   transition-timing-function: ease-in;
+}
+
+.slide-leave-active {
+   -moz-transition-duration: 1s;
+   -webkit-transition-duration: 1s;
+   -o-transition-duration: 1s;
+   transition-duration: 1s;
+   -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+   -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+   -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+}
+
+.slide-enter-to, .slide-leave {
+   max-height: 100px;
+   overflow: hidden;
+}
+
+.slide-enter, .slide-leave-to {
+   overflow: hidden;
+   max-height: 0;
+}
+
 </style>

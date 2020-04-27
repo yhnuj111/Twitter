@@ -6,29 +6,36 @@
     backgroundImage: 'url(' + bannerSrc + ')', 
     height: bannerHeight + 'px', 
     backgroundPosition: 'center top',
-    backgroundSize: 'cover',
-    backgroundAttachment: 'scroll'
+    backgroundAttachment: 'fixed',
+    backgroundSize: 'auto'
     }"
   >
-    <a class="navbar-brand" href="#">
+ 
+  <div style="position:relative; display: flex; align-self: flex-end; justify-content: center; width: auto;" >
+    <div class="imageCropper">
       <img
         v-if="profileSrc != '' && showPics"
         :src="profileSrc"
-        width="50px"
-        height="50px"
-        class="d-inline-block align-top"
+        style="
+                margin: 0 auto;
+                height: 100%;
+                width: auto;"
       />
-      <p
-        style="display: inline; text-align: center; margin: 10px; font: italic small-caps bold 50px/30px Georgia, serif;"
+    </div> 
+    <p
+        style=" display: inline-block; justify-content: center; margin: 10px; font: italic small-caps 2em/1em bold Georgia, serif;"
       >{{username}}</p>
-      <!-- {{bannerSrc}} -->
-    </a>
+  </div>
   </nav>
 </template>
 
 <script>
 import { eventBus } from "../main";
+import UserProfile from "./UserProfiler.vue";
 export default {
+  components: {
+    appUserProfile: UserProfile
+  },
   data() {
     return {
       username: "",
@@ -46,14 +53,14 @@ export default {
         img.onerror = reject;
         img.src = this.bannerSrc;
       });
-    },
-    handleScroll() {
-      let scrolledY = window.scrollY;
-      this.$refs.header.style.backgroundPosition = 'left ' + ((scrolledY)) + 'px';
     }
+    // handleScroll() {
+    //   let scrolledY = window.scrollY;
+    //   this.$refs.header.style.backgroundPosition = 'left ' + ((scrolledY)) + 'px';
+    // }
   },
   async created() {
-    window.addEventListener('scroll', this.handleScroll);
+    // window.addEventListener('scroll', this.handleScroll);
     eventBus.$on("getName", data => {
       this.username = data;
     });
@@ -63,33 +70,39 @@ export default {
     eventBus.$on("getBanner", async data => {
       this.bannerSrc = data;
       // console.log('banner: ' + this.bannerSrc);
-      if (this.bannerSrc === '') {
+      if (this.bannerSrc === "") {
         this.bannerHeight = 80;
         this.bannerSrc = "";
       } else if (this.bannerSrc !== undefined) {
-         this.bannerHeight = await this.loadImgHeight(); 
+        this.bannerHeight = await this.loadImgHeight();
       }
     });
     eventBus.$on("updateWarn", data => {
       if (data == true) {
         this.showPics = false;
         this.username = "";
-        this.bannerSrc="";
+        this.bannerSrc = "";
         this.bannerHeight = 80;
       } else {
         this.showPics = true;
       }
     });
-  },
-  destroyed() {
-    window.removeEventListener('scroll', this.handleScroll);
   }
 };
 </script>
 
 <style>
 .navbar {
-    background-repeat: no-repeat;
-    background-position: center;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.imageCropper {
+  width: 50px;
+  height: 50px;
+  
+  float: left;
+  overflow: hidden;
+  border-radius: 50%;
 }
 </style>
+

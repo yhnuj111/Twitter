@@ -1,22 +1,25 @@
 <template>
   <div class="container">
-    <div class="card grid-item" style="width: 18rem;" v-for="(c,idx) in filterCards" :key="idx">
-      <!-- <img class="card-img-top" alt="Card image cap" v-if="c.types === 'photo' " :src="c.src"/> -->
-      <video
-        class="card-img-top"
-        v-if="c.type ==='video' || c.type === 'animated_gif'"
-        controls
-        loop
-      >
-        <source :src="c.src[0].cardSrc" type="video/mp4" />
-      </video>
-      <app-slider v-else-if="c.type === 'photo'" :allCards="c" :carId="idx" :size="c.src.length"></app-slider>
-      <div class="card-body">
-        <h5 class="card-title">{{c.cardTitle}}</h5>
-        <p class="card-text">{{ c.description }}</p>
-        <button v-clipboard:copy="c.description" class="btn btn-primary">Click to Copy Text</button>
+    <transition-group name="slide-fade" mode="out-in">
+      <div class="card grid-item" style="width: 18rem;" v-for="(c,idx) in filterCards" :key="c.id">
+        <!-- <img class="card-img-top" alt="Card image cap" v-if="c.types === 'photo' " :src="c.src"/> -->
+        <video
+          class="card-img-top"
+          v-if="c.type ==='video' || c.type === 'animated_gif'"
+          controls
+          loop
+        >
+          <source :src="c.src[0].cardSrc" type="video/mp4" />
+        </video>
+        <app-slider v-else-if="c.type === 'photo'" :allCards="c" :carId="idx" :size="c.src.length"></app-slider>
+        <div class="card-body">
+          <h5 class="card-title">{{c.cardTitle}}</h5>
+          <p class="card-text">{{ c.description }}</p>
+          <button v-clipboard:copy="c.description" class="btn btn-primary">Click to Copy Text</button>
+        </div>
       </div>
-    </div>
+   </transition-group>
+   
   </div>
 </template>
 
@@ -24,14 +27,17 @@
 // import axios from "axios";
 import { eventBus } from "../main";
 import Slider from "./Slider.vue";
+import { uuid } from "vue-uuid";
 export default {
   data() {
     return {
       username: "",
       tweets: null,
-      cards: []
+      cards: [],
+      showCard: false
     };
   },
+
   components: {
     appSlider: Slider
   },
@@ -45,7 +51,9 @@ export default {
       let allTweets = this.tweets;
       this.cards = [];
       // console.log(allTweets);
-      
+      if (allTweets.length === 0) {
+          this.$emit('cardsSHow', this.showCard);
+      }
       try {
         for (let i = 0; i < allTweets.length; ++i) {
           let cardSrc = "";
@@ -110,7 +118,6 @@ export default {
               }
               medias.push({ cardSrc });
             } else if (type === "photo") {
-              
               for (
                 let j = 0;
                 j < allTweets[i].extended_entities.media.length;
@@ -136,14 +143,17 @@ export default {
             }
           }
           let tmp = {
+            id: uuid.v4(),
             cardTitle: allTweets[i].created_at,
             description: allTweets[i].text,
             src: medias,
             type
           };
           this.cards.push(tmp);
+          this.$emit('cardsSHow', this.showCard);
         }
       } catch (err) {
+        
         console.log(err);
       }
     }
@@ -157,11 +167,15 @@ export default {
     });
   },
   created() {
-    eventBus.$on("updateWarn",  data => {     
-      if (data) {    
+    eventBus.$on("updateWarn", data => {
+      if (data) {
         this.cards = [];
+        this.showCard = false;
+      } else {
+        this.showCard = true;
       }
     });
+    // console.log(this.showCard);
   }
 };
 </script>
@@ -173,9 +187,29 @@ export default {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  
+  max-width: 1540px;
 }
 
-.container > div {
+
+.container > div{
   margin: 20px;
 }
+.card {
+  margin: 20px;
+  display: inline-block;
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease;
+}
+.slide-fade-leave-active {
+  transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateX(10px);
+  opacity: 0;
+}
+
 </style>
