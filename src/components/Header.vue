@@ -2,6 +2,8 @@
   <nav
     class="navbar navbar-light bg-light"
     ref="header"
+    v-show="switched"
+    :key="headerId"
     :style="{
     backgroundImage: 'url(' + bannerSrc + ')', 
     height: bannerHeight + 'px', 
@@ -10,27 +12,29 @@
     backgroundSize: 'auto'
     }"
   >
- 
-  <div style="position:relative; display: flex; align-self: flex-end; justify-content: center; width: auto;" >
-    <div class="imageCropper">
-      <img
-        v-if="profileSrc != '' && showPics"
-        :src="profileSrc"
-        style="
+    <div
+      style="position:relative; display: flex; align-self: flex-end; justify-content: center; width: auto;"
+    >
+      <div class="imageCropper">
+        <img
+          v-if="profileSrc != '' && showPics"
+          :src="profileSrc"
+          style="
                 margin: 0 auto;
                 height: 100%;
                 width: auto;"
-      />
-    </div> 
-    <p
+        />
+      </div>
+      <p
         style=" display: inline-block; justify-content: center; margin: 10px; font: italic small-caps 2em/1em bold Georgia, serif;"
       >{{username}}</p>
-  </div>
+    </div>
   </nav>
 </template>
 
 <script>
 import { eventBus } from "../main";
+import { uuid } from "vue-uuid";
 import UserProfile from "./UserProfiler.vue";
 export default {
   components: {
@@ -42,52 +46,62 @@ export default {
       profileSrc: "",
       bannerSrc: "",
       bannerHeight: 80,
-      showPics: true
+      showPics: true,
+      headerId: uuid.v4(),
+      switched: false
     };
   },
   methods: {
-    loadImgHeight() {
+    async loadImgHeight() {
       return new Promise((resolve, reject) => {
         let img = new Image();
         img.onload = () => resolve(img.height);
         img.onerror = reject;
         img.src = this.bannerSrc;
       });
-    }
-    // handleScroll() {
-    //   let scrolledY = window.scrollY;
-    //   this.$refs.header.style.backgroundPosition = 'left ' + ((scrolledY)) + 'px';
-    // }
-  },
-  async created() {
-    // window.addEventListener('scroll', this.handleScroll);
-    eventBus.$on("getName", data => {
-      this.username = data;
-    });
-    eventBus.$on("getProfilePic", data => {
-      this.profileSrc = data;
-    });
-    eventBus.$on("getBanner", async data => {
-      this.bannerSrc = data;
-      // console.log('banner: ' + this.bannerSrc);
-      if (this.bannerSrc === "") {
-        this.bannerHeight = 80;
-        this.bannerSrc = "";
-      } else if (this.bannerSrc !== undefined) {
-        this.bannerHeight = await this.loadImgHeight();
-      }
-    });
-    eventBus.$on("updateWarn", data => {
-      if (data == true) {
-        this.showPics = false;
-        this.username = "";
-        this.bannerSrc = "";
-        this.bannerHeight = 80;
+    },
+    show() {
+      if (this.switched) {
+        this.switched = false;
+        return true;
       } else {
-        this.showPics = true;
+
+        return false;
       }
-    });
-  }
+    }
+   
+  },
+  created() {
+        eventBus.$on("getName", async data => {
+          this.username = data;
+        });
+        eventBus.$on("getProfilePic", async data => {
+          this.profileSrc = data;
+        });
+        eventBus.$on("getBanner", async data => {
+          this.bannerSrc = data;
+          // console.log('banner: ' + this.bannerSrc);
+          if (this.bannerSrc === "") {
+            this.bannerHeight = 80;
+            this.bannerSrc = "";
+          } else if (this.bannerSrc !== undefined) {
+            this.bannerHeight = await this.loadImgHeight();
+          }
+        });
+       
+        eventBus.$on("updateWarn", async data => {
+          if (data == false) {
+            this.showPics = false;
+            this.username = "";
+            this.bannerSrc = "";
+            this.bannerHeight = 80;
+          } else {
+            this.showPics = true;
+          }
+        });
+        eventBus.$emit("updateShow", this.showPics);     
+        this.switched = true;
+    }
 };
 </script>
 
@@ -95,11 +109,13 @@ export default {
 .navbar {
   background-repeat: no-repeat;
   background-position: center;
+  max-height: 800px;
 }
+
 .imageCropper {
   width: 50px;
   height: 50px;
-  
+
   float: left;
   overflow: hidden;
   border-radius: 50%;

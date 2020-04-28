@@ -1,5 +1,6 @@
 <template>
   <form class="form-inline" style="padding: 30px; margin: auto; justify-content: center">
+    <app-dropbox> </app-dropbox>
     <input
       class="form-control mr-sm-2"
       type="text"
@@ -8,12 +9,13 @@
       v-model="name"
       lazy
     />
-    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" @click.prevent="sumbit">Search</button>
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" @click.prevent="submit">Search</button>
   </form>
 </template>
 
 <script>
 import { eventBus } from "../main";
+import dropbox from "./Dropdown.vue";
 export default {
   data() {
     return {
@@ -22,13 +24,15 @@ export default {
       finded: false
     };
   },
-
+  components: {
+    appDropbox: dropbox
+  },
   methods: {
-    async sumbit(e) {
+    async submit(e) {
       if (this.dummy !== this.name) {
        this.dummy = this.name;
       await this.axios
-        .post("http://13.58.192.11:4000/search", {
+        .post("http://localhost:4000/search", {
           screen_name: this.name
         })
         .then(res => {
@@ -37,7 +41,7 @@ export default {
               eventBus.$emit("updateWarn", this.finded);
           } else if (res.status === 200 && res.data.status === 200) {
             let un = res.data.msg;
-            // console.log(un);
+            console.log(un);
             if (un.length !== 0) {
               let username = un[0].user.name;
               let userProfilePic = un[0].user.profile_image_url;
@@ -49,14 +53,16 @@ export default {
                 banner = "";
                 eventBus.$emit("getBanner", banner);
               }
-              this.finded = false;
+              this.finded = true;
+              
               eventBus.$emit("updateWarn", this.finded);
               eventBus.$emit("getName", username);
               eventBus.$emit("getProfilePic", userProfilePic);
               eventBus.$emit("updateCard", un);
+              
             }
           } else {
-            this.finded = true;
+            this.finded = false;
             
             eventBus.$emit("updateWarn", this.finded);
           }

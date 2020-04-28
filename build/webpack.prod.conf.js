@@ -64,6 +64,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       filename: config.build.index,
       template: 'index.html',
       inject: true,
+      title: 'Twitter Pic Filter',
       minify: {
         removeComments: true,
         collapseWhitespace: true,

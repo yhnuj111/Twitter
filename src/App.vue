@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <transition name="slide" mode="out-in">
-    <app-header v-if="!isWarning"> </app-header>
+    <app-header v-show="showHeader"> </app-header>
     </transition>
     <app-warn v-if="isWarning"> </app-warn>
     <app-search :finder="isWarning"> </app-search>
@@ -20,7 +20,8 @@ export default {
   name: 'App',
   data() {
     return {
-      isWarning: false
+      isWarning: false,
+      showHeader: false
     }
   },
   components: {
@@ -29,11 +30,31 @@ export default {
     appSearch: Search,
     appWarn: Warning
   },
+  methods: {
+    sleepnow() {
+      return new Promise( resolve =>
+        {
+          this.showHeader = false;
+          resolve();
+        }
+      );
+       
+    }
+  },
   created() {
-    eventBus.$on("updateWarn",  data => {
-      this.isWarning = data;
+    return new Promise((resolve)=>{
+        eventBus.$on("updateWarn",  async data => {
+          this.isWarning = (data === false);      
+        });
+        eventBus.$on("updateWarn", async data => {
+          this.sleepnow().then(()=>{
+            this.showHeader = (data === true);
+          });
+        });
+        resolve();
     });
-    
+        
+     
   },
 
 }
@@ -79,10 +100,10 @@ header span {
 
 
 .slide-enter-active {
-   -moz-transition-duration: 1s;
-   -webkit-transition-duration: 1s;
-   -o-transition-duration: 1s;
-   transition-duration: 1s;
+   -moz-transition-duration: .8s;
+   -webkit-transition-duration: .8s;
+   -o-transition-duration: .8s;
+   transition-duration: .8s;
    -moz-transition-timing-function: ease-in;
    -webkit-transition-timing-function: ease-in;
    -o-transition-timing-function: ease-in;
@@ -90,14 +111,14 @@ header span {
 }
 
 .slide-leave-active {
-   -moz-transition-duration: 1s;
-   -webkit-transition-duration: 1s;
-   -o-transition-duration: 1s;
-   transition-duration: 1s;
-   -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-   -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-   -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+   -moz-transition-duration: .8s;
+   -webkit-transition-duration: .8s;
+   -o-transition-duration: .8s;
+   transition-duration: .8s;
+   -moz-transition-timing-function: ease-in-out;
+   -webkit-transition-timing-function: ease-in;
+   -o-transition-timing-function: ease-in;
+   transition-timing-function: ease-in;
 }
 
 .slide-enter-to, .slide-leave {

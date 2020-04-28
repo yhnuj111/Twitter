@@ -18,8 +18,7 @@
           <button v-clipboard:copy="c.description" class="btn btn-primary">Click to Copy Text</button>
         </div>
       </div>
-   </transition-group>
-   
+    </transition-group>
   </div>
 </template>
 
@@ -34,7 +33,8 @@ export default {
       username: "",
       tweets: null,
       cards: [],
-      showCard: false
+      showCard: false,
+      selectedType: "a"
     };
   },
 
@@ -43,16 +43,22 @@ export default {
   },
   computed: {
     filterCards() {
-      return this.cards.filter(c => c.type !== "");
+      if (this.selectedType === 'a') {
+        return this.cards.filter(c => c.type !== "");
+      } else if (this.selectedType === 'b') {
+        return this.cards.filter(c => c.type === "");
+      } else {
+        return this.cards;
+      }
     }
   },
   methods: {
     async arrangeData() {
       let allTweets = this.tweets;
       this.cards = [];
-      // console.log(allTweets);
+      console.log(allTweets);
       if (allTweets.length === 0) {
-          this.$emit('cardsSHow', this.showCard);
+        this.$emit("cardsSHow", this.showCard);
       }
       try {
         for (let i = 0; i < allTweets.length; ++i) {
@@ -60,88 +66,89 @@ export default {
           let type = "";
           let bitrate = 0;
           let medias = [];
-          if (allTweets[i].extended_entities) {
-            type = allTweets[i].extended_entities.media[0].type;
+            if (allTweets[i].extended_entities) {
+              type = allTweets[i].extended_entities.media[0].type;
 
-            if (type === "video") {
-              for (
-                let j = 0;
-                j <
-                allTweets[i].extended_entities.media[0].video_info.variants
-                  .length;
-                ++j
-              ) {
-                if (
-                  allTweets[i].extended_entities.media[0].video_info.variants[j]
-                    .bitrate
+              if (type === "video") {
+                for (
+                  let j = 0;
+                  j <
+                  allTweets[i].extended_entities.media[0].video_info.variants
+                    .length;
+                  ++j
                 ) {
                   if (
                     allTweets[i].extended_entities.media[0].video_info.variants[
                       j
-                    ].bitrate > bitrate
+                    ].bitrate
                   ) {
-                    bitrate =
+                    if (
                       allTweets[i].extended_entities.media[0].video_info
-                        .variants[j].bitrate;
-                    cardSrc =
-                      allTweets[i].extended_entities.media[0].video_info
-                        .variants[j].url;
+                        .variants[j].bitrate > bitrate
+                    ) {
+                      bitrate =
+                        allTweets[i].extended_entities.media[0].video_info
+                          .variants[j].bitrate;
+                      cardSrc =
+                        allTweets[i].extended_entities.media[0].video_info
+                          .variants[j].url;
+                    }
                   }
                 }
-              }
-              medias.push({ cardSrc });
-            } else if (type === "animated_gif") {
-              for (
-                let j = 0;
-                j <
-                allTweets[i].extended_entities.media[0].video_info.variants
-                  .length;
-                ++j
-              ) {
-                if (
-                  allTweets[i].extended_entities.media[0].video_info.variants[j]
-                    .bitrate !== null
-                ) {
-                  if (
-                    allTweets[i].extended_entities.media[0].video_info.variants[
-                      j
-                    ].bitrate >= bitrate
-                  ) {
-                    bitrate =
-                      allTweets[i].extended_entities.media[0].video_info
-                        .variants[j].bitrate;
-                    cardSrc =
-                      allTweets[i].extended_entities.media[0].video_info
-                        .variants[j].url;
-                  }
-                }
-              }
-              medias.push({ cardSrc });
-            } else if (type === "photo") {
-              for (
-                let j = 0;
-                j < allTweets[i].extended_entities.media.length;
-                ++j
-              ) {
-                cardSrc = allTweets[i].extended_entities.media[j].media_url;
                 medias.push({ cardSrc });
+              } else if (type === "animated_gif") {
+                for (
+                  let j = 0;
+                  j <
+                  allTweets[i].extended_entities.media[0].video_info.variants
+                    .length;
+                  ++j
+                ) {
+                  if (
+                    allTweets[i].extended_entities.media[0].video_info.variants[
+                      j
+                    ].bitrate !== null
+                  ) {
+                    if (
+                      allTweets[i].extended_entities.media[0].video_info
+                        .variants[j].bitrate >= bitrate
+                    ) {
+                      bitrate =
+                        allTweets[i].extended_entities.media[0].video_info
+                          .variants[j].bitrate;
+                      cardSrc =
+                        allTweets[i].extended_entities.media[0].video_info
+                          .variants[j].url;
+                    }
+                  }
+                }
+                medias.push({ cardSrc });
+              } else if (type === "photo") {
+                for (
+                  let j = 0;
+                  j < allTweets[i].extended_entities.media.length;
+                  ++j
+                ) {
+                  cardSrc = allTweets[i].extended_entities.media[j].media_url;
+                  medias.push({ cardSrc });
+                }
               }
-            }
-          } else {
-            if (!("media" in allTweets[i].entities)) {
-              cardSrc = "";
-              type = "";
-              medias.push({ cardSrc });
             } else {
-              // console.log(i + " " + allTweets[i].entities.media.length);
-              for (let j = 0; j < allTweets[i].entities.media.length; ++j) {
+              if (!("media" in allTweets[i].entities)) {
                 cardSrc = "";
-                cardSrc = allTweets[i].entities.media[j].media_url;
+                type = "";
                 medias.push({ cardSrc });
+              } else {
+                // console.log(i + " " + allTweets[i].entities.media.length);
+                for (let j = 0; j < allTweets[i].entities.media.length; ++j) {
+                  cardSrc = "";
+                  cardSrc = allTweets[i].entities.media[j].media_url;
+                  medias.push({ cardSrc });
+                }
+                // medias.push({cardSrc: cardSrc});
               }
-              // medias.push({cardSrc: cardSrc});
             }
-          }
+          
           let tmp = {
             id: uuid.v4(),
             cardTitle: allTweets[i].created_at,
@@ -150,10 +157,9 @@ export default {
             type
           };
           this.cards.push(tmp);
-          this.$emit('cardsSHow', this.showCard);
         }
+        this.$emit("cardsSHow", this.showCard);
       } catch (err) {
-        
         console.log(err);
       }
     }
@@ -167,6 +173,9 @@ export default {
     });
   },
   created() {
+    eventBus.$on("updateSelectedType", data => {
+      this.selectedType = data;
+    });
     eventBus.$on("updateWarn", data => {
       if (data) {
         this.cards = [];
@@ -187,12 +196,11 @@ export default {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  
+
   max-width: 1540px;
 }
 
-
-.container > div{
+.container > div {
   margin: 20px;
 }
 .card {
@@ -211,5 +219,4 @@ export default {
   transform: translateX(10px);
   opacity: 0;
 }
-
 </style>
